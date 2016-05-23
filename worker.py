@@ -14,7 +14,8 @@ NEW_RELIC_QUERY_KEY = config('NEW_RELIC_QUERY_KEY')
 DMS_URL = 'https://api.deadmanssnitch.com/v1/snitches'
 
 formt = '[%(asctime)s] %(levelname)s - %(message)s'
-logging.basicConfig(level=logging.DEBUG, format=formt)
+LOG_LEVEL = config('LOG_LEVEL', default='INFO')
+logging.basicConfig(level=LOG_LEVEL, format=formt)
 
 
 @update_cachet
