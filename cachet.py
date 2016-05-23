@@ -16,6 +16,7 @@ class Cachet():
     PERFORMANCE_ISSUES = 2
     PARTIAL_OUTAGE = 3
     MAJOR_OUTAGE = 4
+    components = []
 
     def __init__(self):
         self.session = requests.Session()
@@ -34,15 +35,15 @@ class Cachet():
         response.raise_for_status()
         return response
 
-    @property
-    def components(self):
+    def update_components(self):
         components = []
         url = self.UPDATE_URL
+
         while url:
             response = self.session.get(url)
             data = response.json()
             try:
-                url = data['meta']['next_page']
+                url = data['meta']['pagination']['links']['next_page']
             except KeyError:
                 url = None
 
@@ -53,7 +54,8 @@ class Cachet():
                     'tags': entry.get('tags', dict()).keys(),
                 })
 
-        return components
+        self.components = components
+        return self.components
 
 cachet = Cachet()
 
@@ -61,10 +63,9 @@ cachet = Cachet()
 def update_cachet(function):
     def _update_cachet():
         updates = function()
+        cachet.update_components()
 
         for update in updates:
-
-
             for cc in cachet.components:
                 if update.id in cc.get('tags', []):
                     cachet.update({'status': update.status}, component_id=cc['id'])
