@@ -10,8 +10,8 @@ from cachet import CachetComponent, cachet, update_cachet
 DMS_API_KEY = config('DMS_API_KEY')
 NEW_RELIC_API_KEY = config('NEW_RELIC_API_KEY')
 NEW_RELIC_QUERY_KEY = config('NEW_RELIC_QUERY_KEY')
-
 DMS_URL = 'https://api.deadmanssnitch.com/v1/snitches'
+DMS_PING_URL = config('DMS_PING_URL', default=None)
 
 formt = '[%(asctime)s] %(levelname)s - %(message)s'
 LOG_LEVEL = config('LOG_LEVEL', default='INFO')
@@ -100,12 +100,20 @@ def fetch_synthetics():
     return monitors
 
 
+def ping_dms():
+    requests.get(DMS_PING_URL)
+
+
 if __name__ == '__main__':
     from apscheduler.schedulers.blocking import BlockingScheduler
     scheduler = BlockingScheduler()
 
-    for job in [fetch_snitches, fetch_newrelic, fetch_synthetics]:
+    for job in [fetch_snitches, fetch_newrelic, fetch_synthetics, ping_dms]:
         scheduler.add_job(job, 'interval', minutes=2,
+                          max_instances=1, coalesce=True)
+
+    if DMS_PING_URL:
+        scheduler.add_job(ping_dms, 'interval', minutes=2,
                           max_instances=1, coalesce=True)
 
     try:
