@@ -68,7 +68,9 @@ def update_cachet(function):
         for update in updates:
             for cc in cachet.components:
                 if update.id in cc.get('tags', []):
-                    cachet.update({'status': update.status}, component_id=cc['id'])
+                    cachet.update(
+                        {'status': update.status, 'enabled': cc.enabled},
+                        component_id=cc['id'])
                     break
             else:
                 cachet.update({
