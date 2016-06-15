@@ -100,21 +100,19 @@ def fetch_synthetics():
     return monitors
 
 
-def ping_dms():
-    requests.get(DMS_PING_URL)
+def update():
+    fetch_snitches()
+    fetch_newrelic()
+    fetch_synthetics()
+    if DMS_PING_URL:
+        requests.get(DMS_PING_URL)
 
 
 if __name__ == '__main__':
     from apscheduler.schedulers.blocking import BlockingScheduler
     scheduler = BlockingScheduler()
 
-    for job in [fetch_snitches, fetch_newrelic, fetch_synthetics, ping_dms]:
-        scheduler.add_job(job, 'interval', minutes=2,
-                          max_instances=1, coalesce=True)
-
-    if DMS_PING_URL:
-        scheduler.add_job(ping_dms, 'interval', minutes=2,
-                          max_instances=1, coalesce=True)
+    scheduler.add_job(update, 'interval', minutes=2, max_instances=1, coalesce=True)
 
     try:
         scheduler.start()
