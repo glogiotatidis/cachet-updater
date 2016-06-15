@@ -1,0 +1,24 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "cachet",
+      "image": "giorgos/cachet:v2.2.4",
+      "essential": true,
+      "memory": 128,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "containerPort": 5000
+        }
+      ],
+      "mountPoints": []
+    },
+    {
+      "name": "worker",
+      "image": "giorgos/cachet-updater:latest",
+      "essential": true,
+      "memory": 128
+    }
+  ]
+}
